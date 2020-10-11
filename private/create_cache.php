@@ -35,7 +35,6 @@ $cache = json_decode($cache, true);
 $indexfilename = __DIR__ . '/index';
 $index = _readfile($indexfilename, '0');
 $index = intval($index);
-echo 'start index: ' . $index . $breakline;
 
 // do
 $numOfRequests = Config::numberOfRequests * 2;
@@ -60,19 +59,16 @@ for ($i = 0; $i < $numOfRequests; $i += 2) {
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_HEADER, false);
 	$r = curl_exec($ch);
+	curl_close($ch);
 	if ($r === false) {
 		echo 'FAILED: ' . $target[$i] . ', ' . $target[$i + 1] . $breakline;
+		continue;
 	}
-	curl_close($ch);
 
 	$rj = json_decode($r, true);
 	$cache[$target[$i]] = '' . $rj[Config::baseCurrency . '_' . $target[$i]];
 	$cache[$target[$i + 1]] = '' . $rj[Config::baseCurrency . '_' . $target[$i + 1]];
-
-	echo 'Success: ' . $target[$i] . ', ' . $target[$i + 1] . $breakline;
 }
-
-echo 'last index: ' . $index . $breakline;
 
 // write cache back to file
 $cache = json_encode($cache);
@@ -84,5 +80,3 @@ fclose($cachefile);
 $indexfile = fopen($indexfilename, 'w');
 fwrite($indexfile, $index);
 fclose($indexfile);
-
-echo 'done!';
