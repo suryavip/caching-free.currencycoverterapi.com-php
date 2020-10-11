@@ -35,7 +35,7 @@ $cache = json_decode($cache, true);
 $indexfilename = __DIR__ . '/index';
 $index = _readfile($indexfilename, '0');
 $index = intval($index);
-echo 'current index is ' . $index . $breakline;
+echo 'start index: ' . $index . $breakline;
 
 // do
 $numOfRequests = Config::numberOfRequests * 2;
@@ -61,16 +61,18 @@ for ($i = 0; $i < $numOfRequests; $i += 2) {
 	curl_setopt($ch, CURLOPT_HEADER, false);
 	$r = curl_exec($ch);
 	if ($r === false) {
-		echo 'FAILED to fetch: ' . $target[$i] . ' and ' . $target[$i + 1] . $breakline;
+		echo 'FAILED: ' . $target[$i] . ', ' . $target[$i + 1] . $breakline;
 	}
 	curl_close($ch);
 
 	$rj = json_decode($r, true);
-	$cache[$target[$i]] = $rj[Config::baseCurrency . '_' . $target[$i]];
-	$cache[$target[$i + 1]] = $rj[Config::baseCurrency . '_' . $target[$i + 1]];
+	$cache[$target[$i]] = '' . $rj[Config::baseCurrency . '_' . $target[$i]];
+	$cache[$target[$i + 1]] = '' . $rj[Config::baseCurrency . '_' . $target[$i + 1]];
 
-	echo 'Success to fetch: ' . $target[$i] . ' and ' . $target[$i + 1] . $breakline;
+	echo 'Success: ' . $target[$i] . ', ' . $target[$i + 1] . $breakline;
 }
+
+echo 'last index: ' . $index . $breakline;
 
 // write cache back to file
 $cache = json_encode($cache);
@@ -83,4 +85,4 @@ $indexfile = fopen($indexfilename, 'w');
 fwrite($indexfile, $index);
 fclose($indexfile);
 
-echo 'finished!';
+echo 'done!';
