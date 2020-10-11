@@ -1,7 +1,7 @@
 <?php
 
 // getting apikey
-$apikeyfilename = 'private/apikey.txt';
+$apikeyfilename = __DIR__ . '/private/apikey.txt';
 $apikeyfile = fopen($apikeyfilename, 'r') or die('Unable to open file!');
 $apikey = fread($apikeyfile, filesize($apikeyfilename));
 fclose($apikeyfile);
@@ -23,7 +23,7 @@ $currencies = array_keys($rj['results']);
 $currencies = json_encode($currencies);
 
 // storing on currencies.json
-$currenciesFile = fopen('currencies.json', 'w');
+$currenciesFile = fopen(__DIR__ . '/currencies.json', 'w');
 fwrite($currenciesFile, $currencies);
 fclose($currenciesFile);
 
