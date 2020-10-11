@@ -4,8 +4,6 @@ require_once __DIR__ . '/config.php';
 
 $breakline = "\r\n";
 
-echo 'start of create_cache.php\n' . $breakline;
-
 function _readfile(string $filename, string $default='')
 {
 	if (!file_exists($filename)) {
@@ -22,29 +20,24 @@ function _readfile(string $filename, string $default='')
 }
 
 // getting apikey
-echo 'getting apikey...' . $breakline;
 $apikey = _readfile(__DIR__ . '/apikey.txt');
 
 // getting list of currencies
-echo 'getting list of currencies...' . $breakline;
 $currencies = _readfile(__DIR__ . '/../currencies.json', '[]');
 $currencies = json_decode($currencies, true);
-echo count($currencies) . ' currencies to be loaded' . $breakline;
 
 // load current cache
-echo 'load current cache...' . $breakline;
 $cachefilename = __DIR__ . '/../cache_' . Config::baseCurrency . '.json';
 $cache = _readfile($cachefilename, '{}');
 $cache = json_decode($cache, true);
 
 // load current index position
-echo 'load current index...' . $breakline;
 $indexfilename = __DIR__ . '/index';
 $index = _readfile($indexfilename, '0');
 $index = intval($index);
+echo 'current index is ' . $index . $breakline;
 
 // do
-echo 'determining what currencies to be fetched...' . $breakline;
 $numOfRequests = Config::numberOfRequests * 2;
 if ($numOfRequests > count($currencies)) {
 	$numOfRequests = count($currencies);
@@ -60,7 +53,6 @@ while (count($target) < $numOfRequests) {
 	$index++;
 }
 
-echo 'fetching ' . join(', ', $target) . '...' . $breakline;
 for ($i = 0; $i < $numOfRequests; $i += 2) {
 	$url = 'https://free.currconv.com/api/v7/convert?apiKey=' . $apikey . '&q=' .  Config::baseCurrency . '_' . $target[$i] . ',' . Config::baseCurrency . '_' . $target[$i + 1] . '&compact=ultra';
 
@@ -81,14 +73,12 @@ for ($i = 0; $i < $numOfRequests; $i += 2) {
 }
 
 // write cache back to file
-echo 'updating cache file...' . $breakline;
 $cache = json_encode($cache);
 $cachefile = fopen($cachefilename, 'w');
 fwrite($cachefile, $cache);
 fclose($cachefile);
 
 // write index back to file
-echo 'updating index file...' . $breakline;
 $indexfile = fopen($indexfilename, 'w');
 fwrite($indexfile, $index);
 fclose($indexfile);
