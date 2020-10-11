@@ -20,9 +20,9 @@ curl_close($ch);
 
 $rj = json_decode($r, true);
 $currencies = array_keys($rj['results']);
-$currencies = json_encode($currencies);
 
 // storing on currencies.json
+$currencies = json_encode($currencies);
 $currenciesFile = fopen(__DIR__ . '/currencies.json', 'w');
 fwrite($currenciesFile, $currencies);
 fclose($currenciesFile);
