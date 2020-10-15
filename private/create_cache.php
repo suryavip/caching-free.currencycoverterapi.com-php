@@ -53,21 +53,38 @@ while (count($target) < $numOfRequests) {
 }
 
 for ($i = 0; $i < $numOfRequests; $i += 2) {
-	$url = 'https://free.currconv.com/api/v7/convert?apiKey=' . $apikey . '&q=' .  Config::baseCurrency . '_' . $target[$i] . ',' . Config::baseCurrency . '_' . $target[$i + 1] . '&compact=ultra';
+	if ($i > 0) sleep(Config::waitBetweenRequest);
+
+	$subKey1 = $target[$i];
+	$subKey2 = $target[$i + 1];
+	$key1 = Config::baseCurrency . '_' . $subKey1;
+	$key2 = Config::baseCurrency . '_' . $subKey2;
+
+	$url = 'https://free.currconv.com/api/v7/convert?apiKey=' . $apikey . '&q=' .  $key1 . ',' . $key2 . '&compact=ultra';
 
 	$ch = curl_init($url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_HEADER, false);
 	$r = curl_exec($ch);
+	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	curl_close($ch);
+
 	if ($r === false) {
-		echo 'FAILED: ' . $target[$i] . ', ' . $target[$i + 1] . $breakline;
+		echo 'FAILED: ' . $subKey1 . ', ' . $subKey2 . $breakline;
+		continue;
+	}
+	if ($http_code != 200) {
+		echo 'FAILED (' . $http_code . '): ' . $subKey1 . ', ' . $subKey2 . $breakline;
 		continue;
 	}
 
 	$rj = json_decode($r, true);
-	$cache[$target[$i]] = '' . $rj[Config::baseCurrency . '_' . $target[$i]];
-	$cache[$target[$i + 1]] = '' . $rj[Config::baseCurrency . '_' . $target[$i + 1]];
+
+	if (array_key_exists($key1, $rj)) $cache[$subKey1] = '' . $rj[$key1];
+	else echo 'FAILED (key_not_found): ' . $subKey1 . $breakline;
+
+	if (array_key_exists($key2, $rj)) $cache[$subKey2] = '' . $rj[$key2];
+	else echo 'FAILED (key_not_found): ' . $subKey2 . $breakline;
 }
 
 // write cache back to file
